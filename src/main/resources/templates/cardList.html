@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="webjars/jquery/3.2.1/jquery.js"></script>
+    <script src="/layui/layui.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="layui-col-md12">
+    <div class="layui-card">
+        <form class="layui-form layui-card-header" style="padding-top: 15px;padding-bottom: 15px;height: auto;">
+            <div class="layui-form-item" style="display: inline-block;">
+                <label class="layui-form-label">卡券类型</label>
+                <div class="layui-input-block">
+                    <select name="cardType" id="cardType" >
+                        <option value="">不限</option>
+                        <option th:each="cardInfo : ${cardList}" th:value="${cardInfo.cardType}">[[${cardInfo.cardType}]]</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" style="display: inline-block;">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit  id="queryKey" lay-filter="formDemo">查询</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+        <div class="layui-card-body ">
+            <table id="cardTab" lay-filter="demo" ></table>
+        </div>
+
+    </div>
+</div>
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">批量删除</button>
+        <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+    </div>
+</script>
+<script type="text/html" id="cardTabBar">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script th:inline="none">
+    layui.use(['table','form'], function(){
+        var table = layui.table;
+
+        //第一个实例
+        tableResult=table.render({
+            elem: '#cardTab'
+            ,url: '/queryCardListByPage' //数据接口
+            ,toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            ,request: {
+                pageName: 'pageNum' //页码的参数名称，默认：page
+                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            }
+            ,page: {
+                limit: 5,
+                limits:[5,10,15,20,25],
+                groups:5,
+            }
+            ,title:"卡券信息列表"
+            ,cols: [[ //表头
+                {type:'checkbox'},
+                {field: 'cardId', title: 'ID', width:80, sort: true}
+                ,{field: 'cardName', title: '卡片名称', width:120}
+                ,{field: 'cardContent', title: '卡片介绍', width:200}
+                ,{field: 'cardType', title: '卡片类型',width:120}
+                ,{title: "操作", toolbar:"#cardTabBar",fixed:"right",align:"center"}
+            ]]
+        });
+        //监听工具条
+        table.on('tool(demo)', function(obj){
+            var cardInfo = obj.data;
+            if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+                    obj.del();
+                    layer.close(index);
+                    console.log(obj.data)
+                    $.ajax({
+                        url:"/deleteCard",
+                        type:"delete",
+                        data:cardInfo,
+                        success:function(data){
+                        },
+                        error:function (data) {
+                            console.log("error")
+                            console.log(JSON.stringify(data));
+                        }
+                    });
+                });
+            } else if(obj.event === 'edit'){
+                //页面层-自定义
+                layer.open({
+                    type: 2,
+                    title: "编辑卡片",
+                    closeBtn: 1,//显示关闭按钮
+                    shadeClose: true,
+                    skin: 'layui-layer-lan',
+                    content: "/editCard?cardId="+cardInfo["cardId"],
+                    area: ['500px', '300px'],//设置弹框大小
+                });
+            }
+        });
+        //监听事件
+        table.on('toolbar(demo)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            if(obj.event==='delete'){
+                var cardList = JSON.stringify(checkStatus.data);
+                $.ajax({
+                    url:"/deleteCardList",
+                    type:"delete",
+                    contentType:'application/json',
+                    data:cardList,
+                    success:function(data){
+                        table.reload("cardTab",{})
+                    },
+                    error:function (data) {
+                        console.log("error")
+                        console.log(JSON.stringify(data));
+                    }
+                });
+
+            }else if(obj.event==='add'){
+                //页面层-自定义
+                layer.open({
+                    type: 2,
+                    title: "添加卡片",
+                    closeBtn: 1,//显示关闭按钮
+                    shadeClose: true,
+                    skin: 'layui-layer-lan',
+                    content: "/addCard",
+                    area: ['500px', '300px'],//设置弹框大小
+                });
+            }
+        });
+        //点击查询按钮，重载表格
+        $('#queryKey').on('click', function() {
+            table.reload('cardTab', {
+                where : {
+                    cardType : $('#cardType').val(),
+                },
+                page : {
+                    curr : 1
+                }
+            });
+            return false;
+        });
+
+    });
+
+
+</script>
+</body>
+</html>

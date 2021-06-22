@@ -1,0 +1,14 @@
+.layui-table-cell {
+    height: 60px;
+    line-height: 60px;
+    padding: 0 15px;
+    position: relative;
+    box-sizing: border-box;
+    font-size: 35px;
+}
+.layui-btn-xs {
+    height: 35px;
+    line-height: 30px;
+    padding: 0 5px;
+    font-size: 30px;
+}

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="webjars/jquery/3.2.1/jquery.js"></script>
+    <script src="/layui/layui.js" charset="utf-8"></script>
+    <title>Title</title>
+</head>
+<body>
+<div style="background: white ;padding-top: 30px;padding-right: 30px">
+    <form class="layui-form" action="">
+        <div class="layui-form-item" style="display: none">
+            <label class="layui-form-label">id</label>
+            <div class="layui-input-block">
+                <input type="text" name="userId"  th:value="${userInfo.userId}" lay-verify="required" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">昵称</label>
+            <div class="layui-input-block">
+                <input type="text" name="userName"  th:value="${userInfo.userName}" lay-verify="required" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">性别</label>
+            <div class="layui-input-block">
+                <input type="radio" name="sex" value="男" title="男" th:checked="${userInfo.sex}=='男'">
+                <input type="radio" name="sex" value="女" title="女" th:checked="${userInfo.sex}=='女'">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">手机号</label>
+            <div class="layui-input-block">
+                <input type="tel" name="msisdn"  th:value="${userInfo.msisdn}" lay-verify="phone" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">省份</label>
+            <div class="layui-input-block">
+                <input type="text" name="prov"  th:value="${userInfo.prov}"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">城市</label>
+            <div class="layui-input-block">
+                <input type="text" name="city"  th:value="${userInfo.city}"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    //Demo
+    layui.use(['form','layer'], function(){
+        var form = layui.form;
+        var layer = layui.layer;
+
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+
+            var userInfo = JSON.stringify(data.field);
+            console.log(userInfo);
+            $.ajax({
+                url:"/saveEditUser",
+                type:"post",
+                contentType:'application/json',
+                data:userInfo,
+                success:function(data){
+                    var index=parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                    window.parent.location.reload();
+                },
+                error:function (data) {
+                    console.log("error")
+                    console.log(JSON.stringify(data));
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

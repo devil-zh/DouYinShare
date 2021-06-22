@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="webjars/jquery/3.2.1/jquery.js"></script>
+    <script src="/layui/layui.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="layui-col-md12">
+    <div class="layui-card">
+        <form class="layui-form layui-card-header" style="padding-top: 15px;padding-bottom: 15px;height: auto;">
+            <div class="layui-form-item" style="display: inline-block;">
+                <label class="layui-form-label">活动名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="activityName" id="activityName"  autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="display: inline-block;">
+                <label class="layui-form-label">商家名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="shopName" id="shopName"  autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="display: inline-block;">
+                <label class="layui-form-label">使用标识</label>
+                <div class="layui-input-block">
+                    <select name="flag" id="flag" >
+                        <option value="">不限</option>
+                        <option value="未使用">未使用</option>
+                        <option value="使用中">使用中</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" style="display: inline-block;">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit  id="queryKey" lay-filter="formDemo">查询</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+        <div class="layui-card-body ">
+            <table id="videoTab" lay-filter="demo" ></table>
+        </div>
+
+    </div>
+</div>
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">批量删除</button>
+    </div>
+</script>
+<script type="text/html" id="videoTabBar">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script th:inline="none">
+    layui.use(['table','form','layer'], function(){
+        var table = layui.table;
+        var layer = layui.layer;
+
+        //第一个实例
+        tableResult=table.render({
+            elem: '#videoTab'
+            ,url: '/queryVideoListByPage' //数据接口
+            ,toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            ,request: {
+                pageName: 'pageNum' //页码的参数名称，默认：page
+                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            }
+            ,page: {
+                limit: 5,
+                limits:[5,10,15,20,25],
+                groups:5,
+            }
+            ,title:"视频信息列表"
+            ,cols: [[ //表头
+                {type:'checkbox'},
+                {field: 'videoId', title: 'ID', width:80, sort: true}
+                ,{field: 'shopId', title: '商家ID', width:80}
+                ,{field: 'shopName', title: '商家名称', width:120}
+                ,{field: 'activityId', title: '活动ID', width:80}
+                ,{field: 'activityName', title: '活动名称', width:120}
+                ,{field: 'createTime', title: '创建时间', width:150}
+                ,{field: 'flag', title: '使用标识', width:100}
+                ,{field: 'videoUrl', title: '视频Url', width:400}
+                ,{title: "操作", toolbar:"#videoTabBar",fixed:"right",align:"center"}
+            ]]
+        });
+        //监听工具条
+        table.on('tool(demo)', function(obj){
+            var videoInfo = obj.data;
+            if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+                    layer.close(index);
+                    $.ajax({
+                        url:"/deleteVideo",
+                        type:"delete",
+                        data:videoInfo,
+                        success:function(data){
+                            table.reload("videoTab",{})
+                        },
+                        error:function (data) {
+                            console.log("error")
+                            console.log(JSON.stringify(data));
+                            layer.msg(data["responseJSON"]["message"])
+                        }
+                    });
+                });
+            }
+        });
+        //监听事件
+        table.on('toolbar(demo)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            if(obj.event==='delete'){
+                var videoList = JSON.stringify(checkStatus.data);
+                $.ajax({
+                    url:"/deleteVideoList",
+                    type:"delete",
+                    contentType:'application/json',
+                    data:videoList,
+                    success:function(data){
+                        table.reload("videoTab",{})
+                    },
+                    error:function (data) {
+                        console.log("error")
+                        console.log(JSON.stringify(data));
+                        layer.msg(data["responseJSON"]["message"])
+                    }
+                });
+
+            }
+        });
+        //点击查询按钮，重载表格
+        $('#queryKey').on('click', function() {
+            table.reload('videoTab', {
+                where : {
+                    activityName : $('#activityName').val(),
+                    shopName : $('#shopName').val(),
+                    flag : $('#flag').val(),
+                },
+                page : {
+                    curr : 1
+                }
+            });
+            return false;
+        });
+
+    });
+
+
+</script>
+</body>
+</html>

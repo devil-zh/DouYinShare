@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="webjars/jquery/3.2.1/jquery.js"></script>
+    <script src="/layui/layui.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="layui-card">
+    <div class="layui-card-header">上传视频</div>
+    <div class="layui-card-body ">
+        <form class="layui-form">
+            <div class="layui-form-item" style="display: none">
+                <label class="layui-form-label">aid</label>
+                <input name="activityId" id="activityId" th:value="${activityId}">
+            </div>
+            <div class="layui-form-item" style="display: none">
+                <label class="layui-form-label">aid</label>
+                <input name="activityId" id="shopId" th:value="${shopId}">
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">活动视频</label>
+                <button type="button" class="layui-btn" id="video">
+                    <i class="layui-icon"></i>上传视频</button>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">修改视频</label>
+                <div class="layui-input-block">
+                    <input type="text" name="videoUrl"  th:value="${videoUrl}" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    layui.use(['upload','layer','form'], function(){
+        var upload = layui.upload;
+        var form = layui.form;
+        var activityId=$('#activityId').val()
+        var shopId=$('#shopId').val()
+
+        upload.render({
+
+            elem: '#video'
+            ,url: '/submitvideo?activityId='+activityId+"&shopId="+shopId //改成您自己的上传接口
+            ,accept: 'video' //视频
+            ,done: function(res){
+                var index=parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                parent.layer.close(index);		//关闭窗口
+                window.parent.location.reload();
+            },
+            error:function (res) {
+                layui.layer.msg('上传失败')
+                console.log(res)
+            }
+        });
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+
+            var videoUrl = data.field['videoUrl'];
+            $.ajax({
+                url:'/updateVideoUrl?activityId='+activityId+"&videoUrl="+videoUrl,
+                type:"post",
+                contentType:'application/json',
+                success:function(data){
+                    var index=parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                    window.parent.location.reload();
+                    parent.layer.alert("修改成功");
+                },
+                error:function (data) {
+                    layui.layer.msg('上传失败')
+                    console.log(JSON.stringify(data));
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

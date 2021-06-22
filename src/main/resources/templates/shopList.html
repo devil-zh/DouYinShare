@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="webjars/jquery/3.2.1/jquery.js"></script>
+    <script src="/layui/layui.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="layui-col-md12">
+    <div class="layui-card">
+            <form class="layui-form layui-card-header" style="padding-top: 15px;padding-bottom: 15px;height: auto;">
+                <div class="layui-form-item" style="display: inline-block;">
+                    <label class="layui-form-label">地址</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="address" id="address"  autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item" style="display: inline-block;">
+                    <label class="layui-form-label">店铺名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="shopName" id="shopName"  autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item" style="display: inline-block;">
+                    <label class="layui-form-label">注册日期</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="regtime" id="regtime"  autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item" style="display: inline-block;">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit  id="queryKey" lay-filter="formDemo">查询</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        <div class="layui-card-body ">
+            <table id="shopTab" lay-filter="demo" ></table>
+        </div>
+
+    </div>
+</div>
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">批量删除</button>
+        <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+    </div>
+</script>
+<script type="text/html" id="shopTabBar">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="cat">活动</a>
+</script>
+<script th:inline="none">
+    layui.use(['table','form','laydate'], function(){
+        var table = layui.table;
+        var laydate = layui.laydate;
+        //日期
+        laydate.render({
+            elem: '#regtime',
+        });
+        //第一个实例
+        tableResult=table.render({
+            elem: '#shopTab'
+            ,url: '/queryShopListByPage' //数据接口
+            ,toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            ,request: {
+                pageName: 'pageNum' //页码的参数名称，默认：page
+                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            }
+            ,page: {
+                limit: 5,
+                limits:[5,10,15,20,25],
+                groups:5,
+            },title:"商家信息列表"
+            ,cols: [[ //表头
+                {type:'checkbox'},
+                {field: 'shopId', title: 'ID', width:80, sort: true}
+                ,{field: 'shopName', title: '店铺名称', width:120}
+                ,{field: 'msisdn', title: '联系人手机号', width:120}
+                ,{field: 'regtime', title: '注册时间',width:100}
+                ,{field: 'exptime', title: '到期时间',width:100}
+                ,{field: 'activityCnt', title: '剩余活动次数',width:80}
+                ,{field: 'city', title: '城市', width:80}
+                ,{field: 'region', title: '地区', width:80}
+                ,{field: 'address', title: '地址', width:80}
+                ,{title: "操作", toolbar:"#shopTabBar",fixed:"right",align:"center"}
+            ]]
+        });
+        //监听工具条
+        table.on('tool(demo)', function(obj){
+            var shopInfo = obj.data;
+            if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+                    obj.del();
+                    layer.close(index);
+                    console.log(obj.data)
+                    $.ajax({
+                        url:"/deleteShop",
+                        type:"delete",
+                        data:shopInfo,
+                        success:function(data){
+                        },
+                        error:function (data) {
+                            console.log("error")
+                            console.log(JSON.stringify(data));
+                        }
+                    });
+                });
+            } else if(obj.event === 'edit'){
+                //页面层-自定义
+                layer.open({
+                    type: 2,
+                    title: "编辑商家",
+                    closeBtn: 1,//显示关闭按钮
+                    shadeClose: true,
+                    skin: 'layui-layer-lan',
+                    content: "/editShop?shopId="+shopInfo["shopId"],
+                    area: ['893px', '600px'],//设置弹框大小
+                });
+            }else if(obj.event === 'cat'){
+                //页面层-自定义
+                layer.open({
+                    type: 2,
+                    title: "商家活动列表",
+                    closeBtn: 1,//显示关闭按钮
+                    shadeClose: true,
+                    skin: 'layui-layer-lan',
+                    content: "/catShopActivityList?shopId="+shopInfo["shopId"],
+                    area: ['893px', '600px'],//设置弹框大小
+                });
+            }
+        });
+        //监听事件
+        table.on('toolbar(demo)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            if(obj.event==='delete'){
+                var shopList = JSON.stringify(checkStatus.data);
+                $.ajax({
+                    url:"/deleteShopList",
+                    type:"delete",
+                    contentType:'application/json',
+                    data:shopList,
+                    success:function(data){
+                        table.reload("shopTab",{})
+                    },
+                    error:function (data) {
+                        console.log("error")
+                        console.log(JSON.stringify(data));
+                    }
+                });
+
+            }else if(obj.event==='add'){
+                //页面层-自定义
+                layer.open({
+                    type: 2,
+                    title: "添加商家",
+                    closeBtn: 1,//显示关闭按钮
+                    shadeClose: true,
+                    skin: 'layui-layer-lan',
+                    content: "/addShop",
+                    area: ['893px', '600px'],//设置弹框大小
+                });
+            }
+        });
+        //点击查询按钮，重载表格
+        $('#queryKey').on('click', function() {
+            table.reload('shopTab', {
+                where : {
+                    address : $('#address').val(),
+                    shopName : $('#shopName').val(),
+                    regtime:$('#regtime').val()
+                },
+                page : {
+                    curr : 1
+                }
+            });
+            return false;
+        });
+
+    });
+
+
+</script>
+</body>
+</html>

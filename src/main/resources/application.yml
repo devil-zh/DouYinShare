@@ -1,0 +1,38 @@
+server:
+  port: 80
+  servlet:
+    session:
+      timeout: 300
+spring:
+  thymeleaf:
+    cache: false
+  datasource:
+    url: jdbc:mysql://47.94.156.170:3306/video?useUnicode=true&characterEncoding=UTF-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: zzh
+    password: XinYue@21
+  servlet:
+    multipart:
+     max-file-size: 100MB
+     max-request-size: 100MB
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  #开启sql打印
+pagehelper:
+  helper-dialect: mysql
+
+fdfs:
+  so-timeout: 1501 # 超时时间
+  connect-timeout: 601 # 连接超时时间
+  thumb-image: # 缩略图
+    width: 60
+    height: 60
+  tracker-list: # tracker地址：你的虚拟机服务器地址+端口（默认是22122）
+    - 47.94.156.170:22122
+upload:
+  baseUrl: http://47.94.156.170:8080/
+  allowType:
+    - image/jpeg
+    - image/png
+    - image/bmp
+    - image/jpg

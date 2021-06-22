@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎参与</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <link rel="stylesheet" href="css/video.css">
+    <script src="webjars/jquery/3.2.1/jquery.js"></script>
+    <script src="/layui/layui.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="layui-col-xs12" style="background: black">
+    <div>
+        <h5 style="color: #FFFF00;text-align: center;font-size: 50px">~恭喜~</h5>
+        <h1 style="color: red;text-align: center;font-size: 80px">您已经成功参与传播达人</h1>
+        <h5 style="color: #c0c4cc;text-align: center;font-size: 40px">您参与传播的作品是</h5>
+    </div>
+    <div class="layui-col-xs-offset1">
+        <video autoplay="autoplay" controls="controls" width="800" height="480" th:src="${activityInfo.videoUrl}" type="video/mp4">
+        </video>
+    </div>
+    <div style="display: none">
+        <input id="openid" th:value="${userInfo.openid}">
+        <input id="activityId" th:value="${activityInfo.activityId}">
+    </div>
+    <div style="background: #2F4056" class="layui-col-xs10 layui-col-xs-offset1">
+        <h5 style="color: white;font-size: 40px;text-align: center">活动介绍</h5>
+        <p style="font-size: 30px;color: #c0c4cc;text-align: center">[[${activityInfo.activityIntroduce}]]
+        </p>
+    </div>
+    <div class="layui-row" style="padding-top: 889px">
+        <div class="layui-col-xs3 layui-col-xs-offset1">
+            <a th:href="'/myCards?activityId='+${activityInfo.activityId}+'&openid='+${userInfo.openid}">
+                <button class="layui-btn layui-btn-primary" style="width:400px;height:100px;font-size: 35px"  id="catCard">查看优惠券</button></a>
+        </div>
+        <div class="layui-col-xs3 layui-col-xs-offset2">
+            <button  class="layui-btn layui-btn-danger" style="width:400px;height:100px;font-size: 35px" id="getCard">领取优惠券</button>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form'], function(){
+        var openid = $('#openid').val();
+        var activityId = $('#activityId').val();
+        //监听按钮
+        $('#getCard').on('click', function() {
+            $.ajax({
+                url:"/addUserCard?openid="+openid+"&activityId="+activityId,
+                type:"get",
+                contentType:'application/json',
+                success:function(data){
+                    layer.msg("<span style='font-size: 35px'>领取成功</span>",{area:['300px','100px']},function () {
+                    });
+                },
+                error:function (data) {
+                    console.log(JSON.stringify(data))
+                    layer.alert(data["responseJSON"]["message"])
+                }
+            });
+        });
+
+    });
+</script>
+</body>
+</html>

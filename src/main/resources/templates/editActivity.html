@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="webjars/jquery/3.2.1/jquery.js"></script>
+    <script src="/layui/layui.js" charset="utf-8"></script>
+</head>
+<body>
+<div style="background: white ;padding-top: 30px;padding-right: 30px">
+    <form class="layui-form" action="">
+        <div class="layui-card">
+            <div class="layui-card-header">基本信息</div>
+            <div class="layui-card-body">
+                <div class="layui-form-item" style="display: none">
+                    <label class="layui-form-label">id</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="activityId"  th:value="${activityInfo.activityId}" lay-verify="required" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">商家编号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="shopId"  lay-verify="required" th:value="${activityInfo.shopId}"  placeholder="商家列表可看"autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">活动标题</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="activityName"  th:value="${activityInfo.activityName}" lay-verify="required" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+               <!-- <div class="layui-form-item">
+                    <label class="layui-form-label">开始时间</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="createDate" id="create_date" th:value="${activityInfo.createDate}"  lay-verify="required" placeholder="yyyy-mm-dd" autocomplete="off" class="layui-input">
+                    </div>
+                </div>-->
+                <div class="layui-form-item">
+                    <label class="layui-form-label">到期时间</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="expDate" id="exp_date"  lay-verify="required" th:value="${activityInfo.expDate}" placeholder="yyyy-mm-dd" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">活动介绍</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="activityIntroduce"  th:value="${activityInfo.activityIntroduce}" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-card">
+            <div class="layui-card-header">卡券设置</div>
+            <div class="layui-card-body">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">核销密码</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="activityPwd" th:value="${activityInfo.activityPwd}" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">卡券</label>
+                    <div class="layui-input-block">
+                       <!-- <input type="text" name="cardId"  th:value="${activityInfo.cardId}"autocomplete="off"placeholder="卡券id" class="layui-input">-->
+                        <select name="cardId" class="layui-select">
+                            <option value="">请选择卡券</option>
+                            <option th:each="cardInfo : ${cardList}" th:value="${cardInfo.cardId}" th:selected="${cardInfo.cardId}==${activityInfo.cardId}">[[${cardInfo.cardName}]]</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    //Demo
+    layui.use(['form','layer','laydate'], function(){
+        var form = layui.form;
+        var layer = layui.layer;
+        var laydate = layui.laydate;
+        var upload = layui.upload;
+        //日期
+        laydate.render({
+            elem: '#create_date',
+        });
+        laydate.render({
+            elem: '#exp_date'
+        });
+
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+
+            var activityInfo = JSON.stringify(data.field);
+            console.log(activityInfo);
+            $.ajax({
+                url:"/saveEditActivity",
+                type:"post",
+                contentType:'application/json',
+                data:activityInfo,
+                success:function(data){
+                    var index=parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                    window.parent.location.reload();
+                    parent.layer.msg("修改成功");
+                },
+                error:function (data) {
+                    console.log("error")
+                    console.log(JSON.stringify(data));
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

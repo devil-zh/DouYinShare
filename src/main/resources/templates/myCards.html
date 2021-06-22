@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="webjars/jquery/3.2.1/jquery.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/coupon.css">
+    <script src="/layui/layui.js" charset="utf-8"></script>
+    <title>欢迎使用</title>
+</head>
+<body>
+      <div class="coupon">
+          <h3 class="tittle">
+              <span class="Coupons">优惠券</span>
+          </h3>
+          <div class="inputPassword">
+              <input class="input" type="text" id="activityPwd" style="border:none;" placeholder="请输入使用密码">
+              <input id="activityId" th:value="${activityId}" style="display: none">
+          </div>
+          <div class="couponList">
+              <div th:if="${userCard!=null}">
+                  <ul>
+                      <li class="couponListS">
+                          <div class="price">
+                              <p class="bigSize" >卡券名称</p>
+                              <p class="smallSize" >[[${userCard.cardName}]]</p>
+                          </div>
+                          <div class="couponInfo">
+                              <span class="couponName">领取时间</span>
+                              <span class="couponTime" >[[${userCard.createTime}]]</span>
+                          </div>
+                          <div class="ischeck">
+                              <input class="radio_type" type="radio" id="cardId" th:value="${userCard.id}"  checked="checked" />
+                          </div>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+          <div class="footer">
+              <p id="useCard">使用</p>
+          </div>
+      </div>   
+</body>
+<script>
+    //Demo
+    layui.use(['form','layer'], function(){
+        var layer = layui.layer;
+            var cardId = $('#cardId').val();
+            var activityId = $('#activityId').val();
+            //监听按钮
+            $('#useCard').on('click', function() {
+                var activityPwd = $('#activityPwd').val();
+
+                $.ajax({
+                    url:"/cardUse?activityPwd="+activityPwd+"&activityId="+activityId+"&cardId="+cardId,
+                    type:"post",
+                    contentType:'application/json',
+                    success:function(data){
+                        location.reload();
+                        layer.msg("使用成功");
+                    },
+                    error:function (data) {
+                        console.log(JSON.stringify(data))
+                        layer.msg(data["responseJSON"]["message"])
+                    }
+                });
+            });
+    });
+</script>
+</html>

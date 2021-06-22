@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="webjars/jquery/3.2.1/jquery.js"></script>
+    <script src="/layui/layui.js" charset="utf-8"></script>
+    <title>Title</title>
+</head>
+<body>
+<div style="background: white ;padding-top: 30px;padding-right: 30px">
+    <form class="layui-form" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">卡片名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="cardName"  lay-verify="required" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">卡片介绍</label>
+            <div class="layui-input-block">
+                <input type="text" name="cardContent"  lay-verify="required" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">卡片类型</label>
+            <div class="layui-input-block">
+                <input type="text" name="cardType"  lay-verify="required" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    //Demo
+    layui.use(['form','layer','laydate'], function(){
+        var form = layui.form;
+        var layer = layui.layer;
+        var laydate = layui.laydate;
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+
+            var cardInfo = JSON.stringify(data.field);
+            console.log(cardInfo);
+            $.ajax({
+                url:"/saveCard",
+                type:"post",
+                contentType:'application/json',
+                data:cardInfo,
+                success:function(data){
+                    var index=parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                    window.parent.location.reload();
+                    parent.layer.alert("添加成功");
+                },
+                error:function (data) {
+                    console.log("error")
+                    console.log(JSON.stringify(data));
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

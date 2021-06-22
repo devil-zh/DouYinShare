@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html class="x-admin-sm" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>欢迎页面-X-admin2.2</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="/login/css/font.css">
+        <link rel="stylesheet" href="/login/css/xadmin.css">
+        <script src="/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/login/js/xadmin.js"></script>
+        <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+        <!--[if lt IE 9]>
+          <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+          <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-header">数据统计</div>
+                        <div class="layui-card-body ">
+                            <ul class="layui-row layui-col-space10 layui-this x-admin-carousel x-admin-backlog">
+                                <li class="layui-col-md4 layui-col-xs6">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>用户数量</h3>
+                                        <p>
+                                            <cite >[[${systemData.userCnt}]]</cite></p>
+                                    </a>
+                                </li>
+                                <li class="layui-col-md4 layui-col-xs6">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>商家数量</h3>
+                                        <p>
+                                            <cite >[[${systemData.shopCnt}]]</cite></p>
+                                    </a>
+                                </li>
+                                <li class="layui-col-md4 layui-col-xs6">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>活动数量</h3>
+                                        <p>
+                                            <cite >[[${systemData.activityCnt}]]</cite></p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-sm6 layui-col-md4">
+                    <div class="layui-card">
+                        <div class="layui-card-header">今日新增用户
+                            <span class="layui-badge layui-bg-cyan layuiadmin-badge">日</span></div>
+                        <div class="layui-card-body  ">
+                            <p class="layuiadmin-big-font" >[[${systemData.userDayCnt}]]</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-sm6 layui-col-md4">
+                    <div class="layui-card">
+                        <div class="layui-card-header">今日新增商家
+                            <span class="layui-badge layui-bg-cyan layuiadmin-badge">日</span></div>
+                        <div class="layui-card-body ">
+                            <p class="layuiadmin-big-font" >[[${systemData.shopDayCnt}]]</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-sm6 layui-col-md4">
+                    <div class="layui-card">
+                        <div class="layui-card-header">今日新增活动
+                            <span class="layui-badge layui-bg-cyan layuiadmin-badge">日</span></div>
+                        <div class="layui-card-body ">
+                            <p class="layuiadmin-big-font" >[[${systemData.activityDayCnt}]]</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-header">系统信息</div>
+                        <div class="layui-card-body ">
+                            <form class="layui-form">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">平台Logo</label>
+                                    <button type="button" class="layui-btn" id="logo">
+                                        <i class="layui-icon">&#xe67c;</i>上传图片
+                                    </button>
+                                </div>
+                            </form>
+                            <div class="layui-upload-list">
+                                <img class="layui-upload-img layui-col-md-offset1" th:src="${systemInfo.logoUrl}" width="92">
+                            </div>
+
+
+                            <form class="layui-form" action="/updateSystemInfo" method="post">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">平台名称</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="systemName" required  lay-verify="required" th:value="${systemInfo.systemName}" autocomplete="off" class="layui-input">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">抖音Client_Key</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="client_key" required  lay-verify="required" th:value="${systemInfo.clientKey}" autocomplete="off" class="layui-input">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">抖音Client_Secret</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="client_secret" required  lay-verify="required" th:value="${systemInfo.clientSecret}" autocomplete="off" class="layui-input">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            layui.use('upload', function(){
+                var upload = layui.upload;
+
+                //执行实例
+                var uploadInst = upload.render({
+                    elem: '#logo' //绑定元素
+                    ,url: '/submitlogo' //上传接口
+                    ,done: function(res){
+                        window.location.href="/welcome"
+                    }
+                    ,error: function(){
+                        //请求异常回调
+                        return null;
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

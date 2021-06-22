@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="webjars/jquery/3.2.1/jquery.js"></script>
+    <script src="/layui/layui.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="layui-col-md12">
+    <div class="layui-card">
+            <form class="layui-form layui-card-header" style="padding-top: 15px;padding-bottom: 15px;height: auto;">
+                <div class="layui-form-item" style="display: inline-block;">
+                    <label class="layui-form-label">活动状态</label>
+                    <div class="layui-input-block">
+                        <select name="activityStatus" id="activityStatus" >
+                            <option value="">不限</option>
+                            <option value="0">已结束</option>
+                            <option value="1">进行中</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item" style="display: inline-block;">
+                    <label class="layui-form-label">活动名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="activityName" id="activityName"  autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item" style="display: inline-block;">
+                    <label class="layui-form-label">商家ID</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="shopId" id="shopId"  autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item" style="display: inline-block;">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit  id="queryKey" lay-filter="formDemo">查询</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        <div class="layui-card-body ">
+            <table id="activityTab" lay-filter="demo" ></table>
+        </div>
+
+    </div>
+</div>
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">批量删除</button>
+        <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+    </div>
+</script>
+<script type="text/html" id="activityTabBar">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="video">上传视频</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="share">推广</a>
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="cat">活动数据</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="drop">结束活动</a>
+</script>
+<script th:inline="none">
+    layui.use(['table','form'], function(){
+        var table = layui.table;
+
+        //第一个实例
+        tableResult=table.render({
+            elem: '#activityTab'
+            ,url: '/queryActivityListByPage' //数据接口
+            ,toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            ,request: {
+                pageName: 'pageNum' //页码的参数名称，默认：page
+                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            }
+            ,page: {
+                limit: 5,
+                limits:[5,10,15,20,25],
+                groups:5,
+            }
+            ,title:"活动信息列表"
+            ,cols: [[ //表头
+                {type:'checkbox'},
+                {field: 'activityId', title: 'ID', width:80, sort: true}
+                ,{field: 'shopId', title: '商家ID', width:80, }
+                ,{field: 'activityName', title: '活动名称', width:100}
+                ,{field: 'users', title: '参与人数', width:100,}
+                ,{field: 'cardName', title: '卡券名称', width:120,}
+                ,{field: 'activityStatus', title: '活动状态', width:100}
+                ,{field: 'expDate', title: '到期时间',width:120}
+                ,{title: "操作", toolbar:"#activityTabBar",fixed:"right",align:"center"}
+            ]]
+        });
+        //监听工具条
+        table.on('tool(demo)', function(obj){
+            var activityInfo = obj.data;
+            if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+                    obj.del();
+                    layer.close(index);
+                    console.log(obj.data)
+                    $.ajax({
+                        url:"/deleteActivity",
+                        type:"delete",
+                        data:activityInfo,
+                        success:function(data){
+                            layer.msg("删除成功")
+                        },
+                        error:function (data) {
+                            console.log("error")
+                            console.log(JSON.stringify(data));
+                        }
+                    });
+                });
+            } else if(obj.event === 'edit'){
+                //页面层-自定义
+                layer.open({
+                    type: 2,
+                    title: "编辑活动",
+                    closeBtn: 1,//显示关闭按钮
+                    shadeClose: true,
+                    skin: 'layui-layer-lan',
+                    content: "/editActivity?activityId="+activityInfo["activityId"],
+                    area: ['893px', '600px'],//设置弹框大小
+                });
+            }else if(obj.event === 'cat'){
+                //页面层-自定义
+                layer.open({
+                    type: 2,
+                    title: "活动数据",
+                    closeBtn: 1,//显示关闭按钮
+                    shadeClose: true,
+                    skin: 'layui-layer-lan',
+                    content: "/catActivity?activityId="+activityInfo["activityId"],
+                    area: ['600px', '300px'],//设置弹框大小
+                });
+            }else if(obj.event === 'drop'){
+                layer.confirm('确定结束吗', function(index){
+                    $.ajax({
+                        url:"/dropActivity",
+                        type:"post",
+                        data:activityInfo,
+                        success:function(data){
+                            window.location.reload();
+                            layer.msg("已结束");
+                        },
+                        error:function (data) {
+                            console.log("error")
+                            console.log(JSON.stringify(data));
+                        }
+                    });
+                });
+            }else if(obj.event === 'share'){
+                //页面层-自定义
+                layer.open({
+                    type: 2,
+                    title: "推广链接",
+                    closeBtn: 1,//显示关闭按钮
+                    shadeClose: true,
+                    skin: 'layui-layer-lan',
+                    content: "/code?activityId="+activityInfo["activityId"],
+                    area: ['493px', '300px'],//设置弹框大小
+                });
+            }else if(obj.event === 'video'){
+                //页面层-自定义
+                layer.open({
+                    type: 2,
+                    title: "添加活动视频",
+                    closeBtn: 1,//显示关闭按钮
+                    shadeClose: true,
+                    skin: 'layui-layer-lan',
+                    content: "/addActivityVideo?activityId="+activityInfo["activityId"]+"&shopId="+activityInfo["shopId"],
+                    area: ['493px', '300px'],//设置弹框大小
+                });
+            }
+
+        });
+        //监听事件
+        table.on('toolbar(demo)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            if(obj.event==='delete'){
+                var activityList = JSON.stringify(checkStatus.data);
+                $.ajax({
+                    url:"/deleteActivityList",
+                    type:"delete",
+                    contentType:'application/json',
+                    data:activityList,
+                    success:function(data){
+                        table.reload("activityTab",{})
+                    },
+                    error:function (data) {
+                        console.log("error")
+                        console.log(JSON.stringify(data));
+                    }
+                });
+
+            }
+            if(obj.event==='add'){
+                //页面层-自定义
+                layer.open({
+                    type: 2,
+                    title: "添加活动",
+                    closeBtn: 1,//显示关闭按钮
+                    shadeClose: true,
+                    skin: 'layui-layer-lan',
+                    content: "/addActivity",
+                    area: ['893px', '600px'],//设置弹框大小
+                });
+            }
+        });
+        //点击查询按钮，重载表格
+        $('#queryKey').on('click', function() {
+            table.reload('activityTab', {
+                where : {
+                    activityStatus : $('#activityStatus').val(),
+                    activityName : $('#activityName').val(),
+                    shopId : $('#shopId').val(),
+                },
+                page : {
+                    curr : 1
+                }
+            });
+            return false;
+        });
+
+    });
+
+
+</script>
+</body>
+</html>
